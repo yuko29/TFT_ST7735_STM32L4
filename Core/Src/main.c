@@ -57,6 +57,77 @@ static void MX_SPI1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int brickRowCount = 5;
+int brickColumnCount = 11;
+int brickWidth = 10;
+int brickHeight = 10;
+int brickPadding = 1;
+int brickOffsetTop = 1;
+int brickOffsetLeft = 1;
+
+int ball_radius = 4;
+int ball_x = 50;
+int ball_y = 90;
+int ball_x_speed = 2;
+int ball_y_speed = 2;
+
+struct Brick {
+	int x;
+	int y;
+	int status;
+};
+
+struct Brick Brick_Field[15][15];
+
+void collisionDetection(){
+	for (int row=0; row<brickRowCount; row++)
+	{
+		for (int col=0; col<brickColumnCount; col++)
+		{
+			struct Brick b = Brick_Field[row][col];
+			if (b.status == 1)
+			{
+//				if (ball_x+ball_radius>=b.x && ball_x-ball_radius<=b.x+brickWidth && ball_y+ball_radius>=b.y && ball_y-ball_radius<=b.y+brickHeight)
+//				{
+//					ball_y_speed = -ball_y_speed;
+//					Brick_Field[row][col].status = 0;
+//					fillRect(Brick_Field[row][col].x, Brick_Field[row][col].y, brickWidth, brickHeight, BLACK);
+//				}
+				//left -> right side
+				if(ball_x+ball_radius>=b.x && ball_x+ball_radius<=b.x+brickWidth && ball_y>b.y && ball_y<b.y+brickHeight)
+				{
+					ball_x_speed = -ball_x_speed;
+					Brick_Field[row][col].status = 0;
+					fillRect(Brick_Field[row][col].x, Brick_Field[row][col].y, brickWidth, brickHeight, BLACK);
+				}
+				//right -> left side
+				else if (ball_x-ball_radius>=b.x && ball_x-ball_radius<=b.x+brickWidth && ball_y>b.y && ball_y<b.y+brickHeight)
+				{
+					ball_x_speed = -ball_x_speed;
+					Brick_Field[row][col].status = 0;
+					fillRect(Brick_Field[row][col].x, Brick_Field[row][col].y, brickWidth, brickHeight, BLACK);
+				}
+				//up -> down side
+				else if (ball_y+ball_radius>=b.y && ball_y+ball_radius<=b.y+brickHeight && ball_x>b.x && ball_x<b.x+brickWidth)
+				{
+
+					ball_y_speed = -ball_y_speed;
+					Brick_Field[row][col].status = 0;
+					fillRect(Brick_Field[row][col].x, Brick_Field[row][col].y, brickWidth, brickHeight, BLACK);
+				}
+				//down -> up side
+				else if (ball_y-ball_radius>=b.y && ball_y-ball_radius<=b.y+brickHeight && ball_x>b.x && ball_x<b.x+brickWidth)
+				{
+
+					ball_y_speed = -ball_y_speed;
+					Brick_Field[row][col].status = 0;
+					fillRect(Brick_Field[row][col].x, Brick_Field[row][col].y, brickWidth, brickHeight, BLACK);
+				}
+			}
+		}
+	}
+}
+
 
 /* USER CODE END 0 */
 
@@ -91,14 +162,85 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   ST7735_Init(0);
-    fillScreen(BLACK);
-    testAll();
+  fillScreen(BLACK);
+
+  /* construct block field */
+
+
+  for(int row=0; row<brickRowCount; row++)
+  {
+	  for(int col=0; col<brickColumnCount; col++)
+	  {
+		  Brick_Field[row][col].x = (col*(brickWidth+brickPadding))+brickOffsetLeft + 4;
+		  Brick_Field[row][col].y = (row*(brickHeight+brickPadding))+brickOffsetTop;
+		  Brick_Field[row][col].status = 1;
+		  fillRect(Brick_Field[row][col].x, Brick_Field[row][col].y, brickWidth, brickHeight, YELLOW);
+	  }
+  }
+
+
+
+//  int w = 10;
+//    for(int y=0; y+w<=60; y=y+w+1)
+//    {
+//		for(int x=4; x+w<=128; x=x+w+1)
+//		{
+//			fillRect(x, y, w, w, YELLOW);
+//		}
+//    }
+
+//    fillCircle(50, 90, 4, MAGENTA);
+//    fillRect(60, 120, 30, 5, GREEN);
+//    fillRect(60, 120, 30, 5, BLACK);
+//    fillRect(55, 120, 30, 5, GREEN);
+//    fillRect(55, 120, 30, 5, BLACK);
+//    fillRect(50, 120, 30, 5, GREEN);
+//    fillRect(50, 120, 30, 5, BLACK);
+//    fillRect(45, 120, 30, 5, GREEN);
+//    fillRect(45, 120, 30, 5, BLACK);
+//    fillRect(40, 120, 30, 5, GREEN);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  int x=60;
+  int y=120;
+  int direct = 0;
+  fillRect(60, 120, 30, 5, GREEN);
+  drawCircle(50, 90, 4, CYAN);
+
+
   while (1)
   {
+	  collisionDetection();
+	  drawCircle(ball_x, ball_y, 4, BLACK);
+	  if(ball_y >= 124) ball_y_speed = -ball_y_speed;
+	  if(ball_x == 4 || ball_x == 124) ball_x_speed = -ball_x_speed;
+	  ball_x += ball_x_speed;
+	  ball_y += ball_y_speed;
+	  drawCircle(ball_x, ball_y, 4, CYAN);
+
+	  if(direct==0 && x>=0 && x<=98)
+	  {
+		  fillRect(x+1, 120, 30, 5, GREEN);
+		  fillRect(x, 120, 1, 5, BLACK);
+		  x++;
+	  }
+	  if(direct==1 && x>=0 && x<=98)
+	  {
+		  fillRect(x-1, 120, 30, 5, GREEN);
+		  fillRect(x+29, 120, 1, 5, BLACK);
+		  x--;
+	  }
+	  if(x<=10)
+	  {
+		  direct=0;
+	  }
+	  else if(x>=90)
+	  {
+		  direct=1;
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
